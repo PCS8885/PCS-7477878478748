@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Coupon</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+    background: #f4f4f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    color: #1d1d2c;
+  }
+  .card {
+    background: #ffffff;
+    border-radius: 28px;
+    box-shadow: 0 16px 50px rgba(20, 20, 40, 0.08);
+    padding: 0 48px 46px;
+    width: 100%;
+    max-width: 480px;
+    text-align: center;
+  }
+  .card.error { padding: 40px 48px 36px; }
+
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* --- ticket dans le formulaire --- */
+  .ticket-wrap {
+    position: relative;
+    width: 150px;
+    margin: -30px auto 26px;
+    padding-bottom: 14px;
+  }
+  .ticket-wrap::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    width: 70px;
+    height: 8px;
+    background: rgba(29, 29, 44, 0.22);
+    border-radius: 50%;
+    filter: blur(2px);
+  }
+  .ticket {
+    width: 100%;
+    height: auto;
+    display: block;
+    mix-blend-mode: multiply;
+  }
+
+  /* --- illustration d'erreur --- */
+  .error-illu {
+    width: 240px;
+    height: auto;
+    display: block;
+    margin: 10px auto 28px;
+  }
+
+  h2 {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: 0.2px;
+    margin-bottom: 38px;
+    color: #1d1d2c;
+  }
+  .error-title {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 14px;
+    color: #1d1d2c;
+  }
+  .error-msg {
+    font-size: 16px;
+    color: #6e6e7a;
+    font-weight: 500;
+    margin-bottom: 30px;
+  }
+
+  .field {
+    position: relative;
+    margin-bottom: 42px;
+  }
+  .field::before {
+    content: "";
+    position: absolute;
+    left: 0; right: 0;
+    bottom: 0;
+    height: 1.5px;
+    background: #e3e3e8;
+    border-radius: 2px;
+  }
+  .field::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    height: 2px;
+    width: 0;
+    background: #ef6f8e;
+    border-radius: 2px;
+    transform: translateX(-50%);
+    transition: width 0.35s cubic-bezier(.4,.0,.2,1);
+  }
+  .field:focus-within::after { width: 100%; }
+
+  .code-input {
+    width: 100%;
+    border: none;
+    text-align: center;
+    font-family: inherit;
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: #1d1d2c;
+    padding: 6px 0 16px;
+    outline: none;
+    background: transparent;
+    position: relative;
+    z-index: 1;
+    transition: transform 0.25s cubic-bezier(.4,.0,.2,1),
+                letter-spacing 0.25s ease,
+                color 0.25s ease;
+  }
+  .code-input::placeholder {
+    color: #c9c9d1;
+    font-weight: 500;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .code-input:focus::placeholder {
+    opacity: 0.4;
+    transform: translateY(-2px);
+  }
+  .code-input.typing { animation: pop 0.22s cubic-bezier(.4,.0,.2,1); }
+  @keyframes pop {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.04); letter-spacing: 2px; }
+    100% { transform: scale(1); }
+  }
+
+  .btn {
+    width: 100%;
+    background: #ef6f8e;
+    color: #ffffff;
+    border: none;
+    border-radius: 999px;
+    padding: 22px 24px;
+    font-family: inherit;
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    box-shadow: 0 8px 18px rgba(239, 111, 142, 0.30);
+    transition: transform 0.08s ease, background 0.2s ease, box-shadow 0.2s ease;
+  }
+  .btn:hover { background: #ea5d80; }
+  .btn:active { transform: translateY(1px); box-shadow: 0 4px 10px rgba(239, 111, 142, 0.25); }
+
+  .link-btn {
+    background: none;
+    border: none;
+    color: #ef6f8e;
+    font-family: inherit;
+    font-size: 17px;
+    font-weight: 700;
+    padding: 18px 0 4px;
+    cursor: pointer;
+    display: block;
+    margin: 0 auto;
+  }
+  .link-btn:hover { color: #ea5d80; }
+</style>
+</head>
+<body>
+  <div class="card" id="card" role="dialog" aria-labelledby="title">
+
+    <!-- Vue: saisie du code -->
+    <div class="view active" id="view-form">
+      <div class="ticket-wrap">
+        <img class="ticket" src="ticket.png" alt="Coupon">
+      </div>
+      <h2 id="title">Entrez le code du coupon</h2>
+      <div class="field">
+        <input type="text" class="code-input" id="code" placeholder="A1B2C3D4E5"
+               maxlength="10" autocomplete="off" spellcheck="false"
+               aria-label="Code du coupon">
+      </div>
+      <button class="btn" type="button" id="validateBtn">Valider</button>
+    </div>
+
+    <!-- Vue: erreur -->
+    <div class="view" id="view-error">
+      <img class="error-illu" src="logo.png" alt="Erreur">
+      <h2 class="error-title">Code validé&nbsp;!</h2>
+      <p class="error-msg">Votre coupon a bien été activé</p>
+      <button class="btn" type="button" id="retryBtn">Continuer</button>
+      <button class="link-btn" type="button" id="cancelBtn">Fermer</button>
+    </div>
+
+  </div>
+
+  <script>
+    const card     = document.getElementById('card');
+    const viewForm = document.getElementById('view-form');
+    const viewErr  = document.getElementById('view-error');
+    const codeInp  = document.getElementById('code');
+
+    function showError() {
+      viewForm.classList.remove('active');
+      viewErr.classList.add('active');
+      card.classList.add('error');
+    }
+    function showForm() {
+      viewErr.classList.remove('active');
+      viewForm.classList.add('active');
+      card.classList.remove('error');
+      codeInp.value = '';
+      codeInp.focus();
+    }
+
+    document.getElementById('validateBtn').addEventListener('click', showError);
+    document.getElementById('retryBtn').addEventListener('click', showForm);
+    document.getElementById('cancelBtn').addEventListener('click', showForm);
+
+    // Animation fluide à chaque frappe
+    codeInp.addEventListener('input', () => {
+      codeInp.classList.remove('typing');
+      // force reflow pour relancer l'animation
+      void codeInp.offsetWidth;
+      codeInp.classList.add('typing');
+    });
+    // Majuscules auto pour les codes
+    codeInp.addEventListener('input', (e) => {
+      const start = e.target.selectionStart;
+      e.target.value = e.target.value.toUpperCase();
+      e.target.setSelectionRange(start, start);
+    });
+  </script>
+</body>
+</html>
