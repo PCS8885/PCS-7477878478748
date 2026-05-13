@@ -2,6 +2,8 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f4f4f6">
 <title>Coupon</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
@@ -162,6 +164,46 @@
   }
   .btn:hover { background: #ea5d80; }
   .btn:active { transform: translateY(1px); box-shadow: 0 4px 10px rgba(239, 111, 142, 0.25); }
+
+  /* ====== MOBILE ====== */
+  @media (max-width: 640px) {
+    body { padding: 20px; }
+    .card {
+      max-width: 100%;
+      border-radius: 32px;
+      padding: 0 28px 38px;
+    }
+    .card.error { padding: 50px 28px 40px; }
+
+    .ticket-wrap {
+      width: 180px;
+      margin: -40px auto 30px;
+      padding-bottom: 18px;
+    }
+    .ticket-wrap::after { width: 90px; height: 10px; }
+
+    .error-illu { width: 78%; max-width: 320px; margin: 18px auto 32px; }
+
+    h2 {
+      font-size: 30px;
+      margin-bottom: 42px;
+    }
+    .error-title { font-size: 30px; margin-bottom: 18px; }
+    .error-msg { font-size: 19px; margin-bottom: 36px; }
+
+    .code-input {
+      font-size: 30px;
+      padding: 10px 0 20px;
+    }
+    .field { margin-bottom: 48px; }
+
+    .btn {
+      padding: 24px;
+      font-size: 22px;
+      border-radius: 999px;
+    }
+    .link-btn { font-size: 19px; padding: 22px 0 8px; }
+  }
 
   .link-btn {
     background: none;
